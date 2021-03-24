@@ -293,29 +293,37 @@ Snap.plugin(function (Snap, Element, Paper, glob) {
         return interHelper(bez1, bez2, 1);
     }
     function interHelper(bez1, bez2, justCount) {
+
+        //sets boxes and checks if they intersect
         var bbox1 = bezierBBox(bez1),
             bbox2 = bezierBBox(bez2);
         if (!isBBoxIntersect(bbox1, bbox2)) {
             return justCount ? 0 : [];
         }
+
+        //gets lenths and inits vars
         var l1 = bezlen.apply(0, bez1),
             l2 = bezlen.apply(0, bez2),
-            n1 = ~~(l1 / 8),
-            n2 = ~~(l2 / 8),
+            n1 = 10,
+            n2 = 10,
             dots1 = [],
             dots2 = [],
             xy = {},
             res = justCount ? 0 : [];
+
+        //inits dots1, cuts bez1 into segments
         for (var i = 0; i < n1 + 1; i++) {
             var p = findDotsAtSegment.apply(0, bez1.concat(i / n1));
             dots1.push({x: p.x, y: p.y, t: i / n1});
         }
+        //inits dots2, cuts bez2 into segments
         for (i = 0; i < n2 + 1; i++) {
             p = findDotsAtSegment.apply(0, bez2.concat(i / n2));
             dots2.push({x: p.x, y: p.y, t: i / n2});
         }
         for (i = 0; i < n1; i++) {
             for (var j = 0; j < n2; j++) {
+                //checks if these linear segments intersect
                 var di = dots1[i],
                     di1 = dots1[i + 1],
                     dj = dots2[j],
@@ -354,10 +362,11 @@ Snap.plugin(function (Snap, Element, Paper, glob) {
         return interPathHelper(path1, path2, 1);
     }
     function interPathHelper(path1, path2, justCount) {
+        //turns path strings to curve arrays
         path1 = path2curve(path1);
         path2 = path2curve(path2);
         var x1, y1, x2, y2, x1m, y1m, x2m, y2m, bez1, bez2,
-            res = justCount ? 0 : [];
+            res = [];
         for (var i = 0, ii = path1.length; i < ii; i++) {
             var pi = path1[i];
             if (pi[0] == "M") {
@@ -388,23 +397,38 @@ Snap.plugin(function (Snap, Element, Paper, glob) {
                             x2 = x2m;
                             y2 = y2m;
                         }
-                        var intr = interHelper(bez1, bez2, justCount);
-                        if (justCount) {
-                            res += intr;
-                        } else {
-                            for (var k = 0, kk = intr.length; k < kk; k++) {
-                                intr[k].segment1 = i;
-                                intr[k].segment2 = j;
-                                intr[k].bez1 = bez1;
-                                intr[k].bez2 = bez2;
-                            }
-                            res = res.concat(intr);
+                        var intr = interHelper(bez1, bez2);
+                        for (var k = 0, kk = intr.length; k < kk; k++) {
+                            intr[k].segment1 = i;
+                            intr[k].segment2 = j;
+                            intr[k].bez1 = bez1;
+                            intr[k].bez2 = bez2;
                         }
+                        res = res.concat(intr);
                     }
                 }
             }
         }
-        return res;
+        res.sort(function(a, b){return b.x - a.x;});
+
+        var fin = [];
+        for (r of res){ //Doesn't build because "of" is "unexpected token"
+            if (fin.length != 0) {
+                var last = fin.slice(-1);
+                if (Math.abs(last.x - r.x) > Math.pow(10, -6) ||
+                    Math.abs(last.y - r.y) > Math.pow(10, -6)) {
+                    fin.push(r);
+                }
+            } else {
+                fin.push(r);
+            }
+        }
+        console.log(res, fin);
+        if (justCount){
+            return fin.length;
+        } else {
+            return fin;
+        }
     }
     function isPointInsidePath(path, x, y) {
         var bbox = pathBBox(path);
@@ -1454,4 +1478,5 @@ Snap.plugin(function (Snap, Element, Paper, glob) {
     Snap.path.map = mapPath;
     Snap.path.toString = toString;
     Snap.path.clone = pathClone;
+    Snap.path.inter = inter;
 });
