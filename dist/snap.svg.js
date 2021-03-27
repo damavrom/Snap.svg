@@ -14,7 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// build: 2021-03-24
+// build: 2021-03-27
 
 // Copyright (c) 2017 Adobe Systems Incorporated. All rights reserved.
 //
@@ -5970,9 +5970,9 @@ Snap.plugin(function (Snap, Element, Paper, glob) {
         res.sort(function(a, b){return b.x - a.x;});
 
         var fin = [];
-        for (r of res){ //Doesn't build because "of" is "unexpected token"
+        for (var r of res){ //Doesn't build because "of" is "unexpected token"
             if (fin.length != 0) {
-                var last = fin.slice(-1);
+                var last = fin.slice(-1)[0];
                 if (Math.abs(last.x - r.x) > Math.pow(10, -6) ||
                     Math.abs(last.y - r.y) > Math.pow(10, -6)) {
                     fin.push(r);
@@ -5981,7 +5981,6 @@ Snap.plugin(function (Snap, Element, Paper, glob) {
                 fin.push(r);
             }
         }
-        console.log(res, fin);
         if (justCount){
             return fin.length;
         } else {
