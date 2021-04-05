@@ -5,7 +5,7 @@
     "main": "./dist/snap.svg.js",
     "repository": {
         "type": "git",
-        "url": "git@github.com:adobe-webplatform/Snap.svg.git"
+        "url": "git@github.com:damavrom/Snap.svg.git"
     },
     "author": "Dmitry Baranovskiy",
     "license": "Apache-2.0",
